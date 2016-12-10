@@ -4,6 +4,7 @@ from flask_restful import Resource, Api, reqparse
 from api_config import endpoints, push_objects
 from global_utilities.contrib.api_utilities.instapush_api import SendNotification
 from datetime import datetime
+import simplejson
 
 
 # Define the app
@@ -13,6 +14,7 @@ api = Api(app)
 # add endpoints using the config file
 api.add_resource(NotifyUser, endpoints.get('notify'))
 api.add_resource(LogEvent, endpoints.get('log'))
+api.add_resource(Test, '/api/v1/test') # DEBUG
 
 
 class NotifyUser(Resource):
@@ -45,6 +47,13 @@ class LogEvent(Resource):
 
         args = parser.parse_args(strict=True)
         # TODO - figure out how we want to log
+
+
+class Test(Resource):# DEBUG
+    def get(self):# DEBUG
+        return simplejson.dumps('Get worked!')# DEBUG
+    def post(self):# DEBUG
+        return simplejson.dumps('Post worked!')# DEBUG
 
 
 if __name__ == '__main__':
