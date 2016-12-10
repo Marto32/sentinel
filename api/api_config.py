@@ -13,7 +13,7 @@ endpoints = {
 push_objects = {
 
         'autome_app': {
-            'app_name': 'autome'
+            'app_name': 'autome',
             'event_weatherme': 'weatherme'
             },
 
