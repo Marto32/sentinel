@@ -1,4 +1,5 @@
 import abc
+import requests
 from datetime import datetime, timedelta
 
 
@@ -18,9 +19,11 @@ class BinaryTrigger(Trigger):
     This object is meant to be fired based on a binary trigger.
     """
 
-    def __init__(self, name, notify_on, notify_off, seconds_threshold=120):
+    def __init__(self, name, notify_endpoint, log_endpoint, notify_on, notify_off, seconds_threshold=120):
         """
         :param name: str, the name of the trigger (used in notifications and logging)
+        :param notify_endpoint: str, the endpoint to hit for notifications
+        :param log_endpoint: str, the endpoint to hit to log events
         :param notify_on: str, instapush interface or api interface, tpd
         :param notify_off: str, instapush interface or api interface, tpd
         :param seconds_threshold: int, the threshold used to notify the user
@@ -29,23 +32,43 @@ class BinaryTrigger(Trigger):
         """
         Trigger.__init__(self)
         self.name = name
+        self.notify_endpoint = notify_endpoint
+        self.log_endpoint = log_endpoint
         self.notify_on = notify_on
         self.notify_off = notify_off
         self.seconds_threshold = float(seconds_threshold)
         self.start_time = None
         self.state = False # Initializes the state of the trigger
 
-    def notify(self):
+    def notify(self, data):
         """
         Method to call the api to notify the user of the trigger state.
-        """
-        raise NotImplementedError
+        :param data: dict, a dictionary including data needed to notify the user
+            with required key 'event_name' and 'trackers'
 
-    def log(self):
+        Example:
+        {
+            'event_name': 'name'
+            'trackers': {
+                'email': 'myemail'
+            }
+        }
+        """
+        return requests.post(self.notify_endpoint, data)
+
+    def log(self, data):
         """
         Method to call the api to log the trigger state
+        :param data: dict, a dictionary containing the data needed to log the event
+            with required keys 'event_name', 'time'
+
+        Example:
+        {
+            'event_name': 'name',
+            'time': datetime
+        }
         """
-        raise NotImplementedError
+        return requests.post(self.log_endpoint, data)
 
     def calculate_time_on(self):
         """
@@ -78,7 +101,8 @@ class BinaryTrigger(Trigger):
 
                 # Inform the end-user that this trigger has been activated
                 # and Log the event
-                self.notify()
+                self.notify(notify_on)
+                # TODO
                 self.log()
 
                 # Set state to active now that the trigger has been fired
@@ -88,10 +112,12 @@ class BinaryTrigger(Trigger):
             elif gpio.input(trigger) and self.state:
                 # check time
                 if self.should_notify():
+                    # TODO
                     self.notify()
 
             elif not gpio.input(trigger) and self.state:
                 # the trigger has been fired due to a 'close' event
+                # TODO
                 self.notify()
                 self.log()
                 self.state = False
