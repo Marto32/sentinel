@@ -9,15 +9,10 @@ endpoints = {
         'log'   : '/sentinel/v1/log'
         }
 
-# Instapush objects
-push_objects = {
+# dictionary of Instapush objects
+push_objects = raise NotImplementedError
 
-        'autome_app': {
-            'app_name': 'autome',
-            'event_weatherme': 'weatherme'
-            },
-
-        'sentinel_app': {
-            'app_name':'sentinel'
-            }
-        }
+# Instapush Credentials
+USER_TOKEN = raise NotImplementedError
+APP_ID = raise NotImplementedError
+APP_SECRET = raise NotImplementedError
