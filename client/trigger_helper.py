@@ -21,10 +21,10 @@ class BinaryTrigger(Trigger):
     This object is meant to be fired based on a binary trigger.
     """
 
-    def __init__(self, name, gpio_trigger, notify_endpoint, log_endpoint, seconds_threshold=120):
+    def __init__(self, name, gpio_pin, notify_endpoint, log_endpoint, seconds_threshold=120):
         """
         :param name: str, the name of the trigger (used in notifications and logging)
-        :param gpio_trigger: the gpio trigger
+        :param gpio_pin: int, the gpio pin number
         :param notify_endpoint: str, the endpoint to hit for notifications
         :param log_endpoint: str, the endpoint to hit to log events
         :param seconds_threshold: int, the threshold used to notify the user
@@ -33,7 +33,7 @@ class BinaryTrigger(Trigger):
         """
         Trigger.__init__(self)
         self.name = name
-        self.gpio_trigger = gpio_trigger
+        self.gpio_pin = gpio_pin
         self.notify_endpoint = notify_endpoint
         self.log_endpoint = log_endpoint
         self.seconds_threshold = float(seconds_threshold)
@@ -89,6 +89,13 @@ class BinaryTrigger(Trigger):
         """
         return True if self.calculate_time_on() >= self.seconds_threshold else False
 
+    def configure_gpio_input(self):
+        ## set GPIO mode to BCM
+        ## this takes GPgpio.number instead of pin number
+        gpio.setmode(gpio.BCM)
+        ## use the built-in pull-up resistor
+        gpio.setup(self.gpio_pin, gpio.IN, pull_up_down=gpio.PUD_UP)  # activate input with PullUp
+
     def monitor(self):
         """
         method that should track status of the trigger and take action according
@@ -99,71 +106,91 @@ class BinaryTrigger(Trigger):
 
 class FrontDoorMonitor(BinaryTrigger):
 
+    def route_action(self):
+        """
+        Used to route actions based on the logic in the
+        monitor method.
+        """
+        if gpio.input(self.gpio_pin) and not self.state:
+            # set the start time
+            self.start_time = datetime.now()
+
+            # Inform the end-user that the front door has been opened
+            # and Log the event
+            payload = {
+                'event_name': 'front_door_opened',
+                'trackers': {'time': self.start_time.strftime('%H:%M:%S')
+                    }
+                }
+
+            self.notify(payload)
+
+            # Prep the log payload
+            log_load = {
+                'trigger_name': self.name,
+                'event_name': payload.get('event_name'),
+                'time': self.start_time.strftime('%Y%m%d %H:%M:%S')
+                }
+
+            self.log(log_load)
+
+            # Set state to active now that the trigger has been fired
+            # and 'opened'
+            self.state = True
+
+        elif gpio.input(self.gpio_pin) and self.state:
+            # check time
+            if self.should_notify():
+                payload = {
+                    'event_name': 'front_door_open_long',
+                    'trackers': {'seconds': self.calculate_time_on()
+                        }
+                    }
+
+                self.notify(payload)
+
+        elif not gpio.input(self.gpio_pin) and self.state:
+            # the trigger has been fired due to a 'close' event
+            close_time = datetime.now()
+
+            # Prep the notificaiton payload
+            payload = {
+                'event_name': 'front_door_closed',
+                'trackers': {'time': close_time.strftime('%H:%M:%S')
+                    }
+                }
+
+            self.notify(payload)
+            # Prep the log payload
+            log_load = {
+                'trigger_name': self.name,
+                'event_name': payload.get('event_name'),
+                'time': close_time.strftime('%Y-%m-%d|%H:%M:%S')
+                }
+
+            self.log(log_load)
+            self.state = False
+
+            # Reset start time
+            self.start_time = None
+
+        else:
+            pass
+
+    def schedule_check(self):
+        """
+        A method to check whether or not the device should
+        be running.
+        """
+        # TODO - Implement scheduling logic
+        return True
+
     def monitor(self):
-        while True
-            if gpio.input(self.gpio_trigger) and not self.state:
-                # set the start time
-                self.start_time = datetime.now()
-
-                # Inform the end-user that the front door has been opened
-                # and Log the event
-                payload = {
-                    'event_name': 'front_door_opened',
-                    'trackers': {'time': self.start_time.strftime('%H:%M:%S')
-                        }
-                    }
-
-                self.notify(payload)
-
-                # Prep the log payload
-                log_load = {
-                    'trigger_name': self.name,
-                    'event_name': payload.get('event_name'),
-                    'time': self.start_time.strftime('%Y%m%d %H:%M:%S')
-                    }
-
-                self.log(log_load)
-
-                # Set state to active now that the trigger has been fired
-                # and 'opened'
-                self.state = True
-
-            elif gpio.input(self.gpio_trigger) and self.state:
-                # check time
-                if self.should_notify():
-                    payload = {
-                        'event_name': 'front_door_open_long',
-                        'trackers': {'seconds': self.calculate_time_on()
-                            }
-                        }
-
-                    self.notify(payload)
-
-            elif not gpio.input(self.gpio_trigger) and self.state:
-                # the trigger has been fired due to a 'close' event
-                close_time = datetime.now()
-
-                # Prep the notificaiton payload
-                payload = {
-                    'event_name': 'front_door_closed',
-                    'trackers': {'time': close_time.strftime('%H:%M:%S')
-                        }
-                    }
-
-                self.notify(payload)
-                # Prep the log payload
-                log_load = {
-                    'trigger_name': self.name,
-                    'event_name': payload.get('event_name'),
-                    'time': close_time.strftime('%Y%m%d %H:%M:%S')
-                    }
-
-                self.log(log_load)
-                self.state = False
-
-                # Reset start time
-                self.start_time = None
-
-            else:
-                pass
+        """
+        This method opens an infinite loop to continuously monitor
+        the trigger. It can be controlled automatically using the
+        `schedule_check` method above.
+        """
+        while True:
+            self.route_action() if self.schedule_check() else pass
 
