@@ -21,9 +21,10 @@ class BinaryTrigger(Trigger):
     This object is meant to be fired based on a binary trigger.
     """
 
-    def __init__(self, name, notify_endpoint, log_endpoint, seconds_threshold=120):
+    def __init__(self, name, gpio_trigger, notify_endpoint, log_endpoint, seconds_threshold=120):
         """
         :param name: str, the name of the trigger (used in notifications and logging)
+        :param gpio_trigger: the gpio trigger
         :param notify_endpoint: str, the endpoint to hit for notifications
         :param log_endpoint: str, the endpoint to hit to log events
         :param seconds_threshold: int, the threshold used to notify the user
@@ -32,6 +33,7 @@ class BinaryTrigger(Trigger):
         """
         Trigger.__init__(self)
         self.name = name
+        self.gpio_trigger = gpio_trigger
         self.notify_endpoint = notify_endpoint
         self.log_endpoint = log_endpoint
         self.seconds_threshold = float(seconds_threshold)
@@ -99,7 +101,7 @@ class FrontDoorMonitor(BinaryTrigger):
 
     def monitor(self):
         while True
-            if gpio.input(trigger) and not self.state:
+            if gpio.input(self.gpio_trigger) and not self.state:
                 # set the start time
                 self.start_time = datetime.now()
 
@@ -112,14 +114,21 @@ class FrontDoorMonitor(BinaryTrigger):
                     }
 
                 self.notify(payload)
-                # TODO
-                # self.log()
+
+                # Prep the log payload
+                log_load = {
+                    'trigger_name': self.name,
+                    'event_name': payload.get('event_name'),
+                    'time': self.start_time.strftime('%Y%m%d %H:%M:%S')
+                    }
+
+                self.log(log_load)
 
                 # Set state to active now that the trigger has been fired
                 # and 'opened'
                 self.state = True
 
-            elif gpio.input(trigger) and self.state:
+            elif gpio.input(self.gpio_trigger) and self.state:
                 # check time
                 if self.should_notify():
                     payload = {
@@ -130,16 +139,26 @@ class FrontDoorMonitor(BinaryTrigger):
 
                     self.notify(payload)
 
-            elif not gpio.input(trigger) and self.state:
+            elif not gpio.input(self.gpio_trigger) and self.state:
                 # the trigger has been fired due to a 'close' event
+                close_time = datetime.now()
+
+                # Prep the notificaiton payload
                 payload = {
                     'event_name': 'front_door_closed',
-                    'trackers': {'time': self.start_time.strftime('%H:%M:%S')
+                    'trackers': {'time': close_time.strftime('%H:%M:%S')
                         }
                     }
 
                 self.notify(payload)
-                # self.log()
+                # Prep the log payload
+                log_load = {
+                    'trigger_name': self.name,
+                    'event_name': payload.get('event_name'),
+                    'time': close_time.strftime('%Y%m%d %H:%M:%S')
+                    }
+
+                self.log(log_load)
                 self.state = False
 
                 # Reset start time
