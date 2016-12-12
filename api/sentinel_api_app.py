@@ -76,5 +76,5 @@ if __name__ == '__main__':
     logging.basicConfig(format=logging_format, handlers=[handler], level=logging.DEBUG)
 
     # Start the server
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', debug=True, port=80)
 
