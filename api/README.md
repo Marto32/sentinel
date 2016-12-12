@@ -12,3 +12,8 @@ To delete this routing change, you can use this:
 
 `iptables -t nat --line-numbers -n -L`
 
+## Starting the server
+To start the server, use the following command. You can run this on the actual box (assuming you only use it for this purpose), or you can run it in a tmux or screen session:
+
+`V_ENV='production' PYTHONPATH=[path to /sentinel] VIRTUAL_ENV=[path to virtual env if you have one] PATH=[path to bin]:$PATH LOGCONFIG=lib/logging.conf [path to python] -- api/sentinel_api_app.py`
+
