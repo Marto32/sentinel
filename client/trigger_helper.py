@@ -191,6 +191,7 @@ class FrontDoorMonitor(BinaryTrigger):
         the trigger. It can be controlled automatically using the
         `schedule_check` method above.
         """
+        self.configure_gpio_input()
         while True:
             self.route_action() if self.schedule_check() else pass
 
