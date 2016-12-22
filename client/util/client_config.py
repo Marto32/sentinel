@@ -21,3 +21,5 @@ gpio_pin_map = {
 # client_identifier = 'example'
 client_identifier = ''
 
+# Set the notification timezone
+notify_tz = ''
