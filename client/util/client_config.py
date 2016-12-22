@@ -13,10 +13,11 @@ endpoints = {
 # Define the BCM pins that are used
 # by each client
 gpio_pin_map = {
-    'front_door': 15
+    # 'example': 15
     }
 
 # Identify this particular client
 # so it knows which monitor and pins to use
-client_identifier = 'front_door'
+# client_identifier = 'example'
+client_identifier = ''
 
