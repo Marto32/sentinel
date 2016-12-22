@@ -24,7 +24,7 @@ class BinaryTrigger(Trigger):
     This object is meant to be fired based on a binary trigger.
     """
 
-    def __init__(self, name, gpio_pin, notify_endpoint, log_endpoint, seconds_threshold=120):
+    def __init__(self, name, gpio_pin, notify_endpoint, log_endpoint, seconds_threshold=30):
         """
         :param name: str, the name of the trigger (used in notifications and logging)
         :param gpio_pin: int, the gpio pin number
@@ -42,7 +42,14 @@ class BinaryTrigger(Trigger):
         self.seconds_threshold = float(seconds_threshold)
         self.start_time = None
         self.state = False # Initializes the state of the trigger
+
+        # Set the notification timezone (to convert to
+        # from UTC)
         self.notification_tz = tz.gettz(notify_tz)
+
+        # Set threshold interval so the user is not
+        # continuously notified after the threshold is passed
+        self.seconds_threshold_interval = self.seconds_threshold
 
     def notify(self, data):
         """
@@ -83,7 +90,7 @@ class BinaryTrigger(Trigger):
             format is [seconds].[microseconds]
         """
         duration = datetime.utcnow() - self.start_time
-        return duration.total_seconds()
+        return round(duration.total_seconds(), 2)
 
     def should_notify(self):
         """
@@ -91,7 +98,11 @@ class BinaryTrigger(Trigger):
 
         :returns: bool, True or False
         """
-        return True if self.calculate_time_on() >= self.seconds_threshold else False
+        if self.calculate_time_on() >= self.seconds_threshold_interval:
+            self.seconds_threshold_interval *= 2
+            return True
+        else:
+            return False
 
     def configure_gpio_input(self):
         ## set GPIO mode to BCM
