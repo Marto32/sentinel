@@ -78,7 +78,7 @@ class BinaryTrigger(Trigger):
         :returns: float, total seconds the trigger has been in one state or 'open'
             format is [seconds].[microseconds]
         """
-        duration = datetime.now() - self.start_time
+        duration = datetime.utcnow() - self.start_time
         return duration.total_seconds()
 
     def should_notify(self):
@@ -104,7 +104,7 @@ class BinaryTrigger(Trigger):
         raise NotImplementedError
 
 
-class FrontDoorMonitor(BinaryTrigger):
+class DoorMonitor(BinaryTrigger):
 
     def route_action(self):
         """
@@ -113,7 +113,7 @@ class FrontDoorMonitor(BinaryTrigger):
         """
         if gpio.input(self.gpio_pin) and not self.state:
             # set the start time
-            self.start_time = datetime.now()
+            self.start_time = datetime.utcnow()
 
             # Inform the end-user that the front door has been opened
             # and Log the event
@@ -151,7 +151,7 @@ class FrontDoorMonitor(BinaryTrigger):
 
         elif not gpio.input(self.gpio_pin) and self.state:
             # the trigger has been fired due to a 'close' event
-            close_time = datetime.now()
+            close_time = datetime.utcnow()
 
             # Prep the notificaiton payload
             payload = {
