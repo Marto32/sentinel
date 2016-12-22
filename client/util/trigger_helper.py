@@ -104,7 +104,7 @@ class BinaryTrigger(Trigger):
         raise NotImplementedError
 
 
-class FrontDoorMonitor(BinaryTrigger):
+class DoorMonitor(BinaryTrigger):
 
     def route_action(self):
         """
