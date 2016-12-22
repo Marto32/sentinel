@@ -1,7 +1,7 @@
-from client.util.trigger_helper import FrontDoorMonitor
+from client.util.trigger_helper import DoorMonitor
 from client.util.client_config import endpoints, gpio_pin_map, client_identifier
 
-front_door = FrontDoorMonitor(
+front_door = DoorMonitor(
     name='front_door',
     gpio_pin=gpio_pin_map.get('front_door'),
     notify_endpoint=endpoints.get('notify'),
