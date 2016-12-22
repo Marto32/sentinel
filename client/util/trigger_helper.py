@@ -193,5 +193,7 @@ class FrontDoorMonitor(BinaryTrigger):
         """
         self.configure_gpio_input()
         while True:
-            self.route_action() if self.schedule_check() else pass
+            if self.schedule_check():
+                self.route_action()
+
 
