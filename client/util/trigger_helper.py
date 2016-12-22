@@ -1,6 +1,9 @@
 import abc
 import requests
 from datetime import datetime, timedelta
+from dateutil import tz
+
+from client.util.client_config import notify_tz
 
 import RPi.GPIO as gpio
 
@@ -39,6 +42,7 @@ class BinaryTrigger(Trigger):
         self.seconds_threshold = float(seconds_threshold)
         self.start_time = None
         self.state = False # Initializes the state of the trigger
+        self.notification_tz = tz.gettz(notify_tz)
 
     def notify(self, data):
         """
@@ -96,6 +100,15 @@ class BinaryTrigger(Trigger):
         ## use the built-in pull-up resistor
         gpio.setup(self.gpio_pin, gpio.IN, pull_up_down=gpio.PUD_UP)  # activate input with PullUp
 
+    def convert_timezone_for_notification(self, utc_time):
+        """
+        :param utc_time: datetime, The time in UTC as a datetime object
+        :returns: str, The time to input in notify
+        """
+        utc = utc_time.replace(tzinfo=tz.tzutc())
+        converted_datetime = utc.astimezone(self.notification_tz)
+        return converted_datetime.strftime('%H:%M:%S')
+
     def monitor(self):
         """
         method that should track status of the trigger and take action according
@@ -119,7 +132,7 @@ class DoorMonitor(BinaryTrigger):
             # and Log the event
             payload = {
                 'event_name': 'front_door_opened',
-                'trackers': {'time': self.start_time.strftime('%H:%M:%S')
+                'trackers': {'time': self.convert_timezone_for_notification(self.start_time)
                     }
                 }
 
@@ -156,7 +169,7 @@ class DoorMonitor(BinaryTrigger):
             # Prep the notificaiton payload
             payload = {
                 'event_name': 'front_door_closed',
-                'trackers': {'time': close_time.strftime('%H:%M:%S')
+                'trackers': {'time': self.convert_timezone_for_notification(close_time)
                     }
                 }
 
