@@ -13,6 +13,6 @@ endpoints = {
 push_objects = raise NotImplementedError
 
 # Instapush Credentials
-USER_TOKEN = raise NotImplementedError
-APP_ID = raise NotImplementedError
-APP_SECRET = raise NotImplementedError
+USER_TOKEN = ''
+APP_ID = ''
+APP_SECRET = ''
