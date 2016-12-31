@@ -10,7 +10,7 @@ endpoints = {
         }
 
 # dictionary of Instapush objects
-push_objects = ''
+push_objects = {}
 
 # Instapush Credentials
 USER_TOKEN = ''
