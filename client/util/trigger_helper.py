@@ -198,6 +198,9 @@ class DoorMonitor(BinaryTrigger):
             # Reset start time
             self.start_time = None
 
+            # Reset the threshold interval
+            self.seconds_threshold_interval = self.seconds_threshold
+
         else:
             pass
 
