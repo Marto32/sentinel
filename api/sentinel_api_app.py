@@ -13,6 +13,8 @@ import os
 from logging.handlers import RotatingFileHandler
 import logging
 
+from retrying import retry
+
 
 # Define the app
 app = Flask(__name__)
@@ -65,6 +67,15 @@ api.add_resource(NotifyUser, endpoints.get('notify'))
 api.add_resource(LogEvent, endpoints.get('log'))
 
 
+@retry(stop_max_attempt_number=30, wait_fixed=500)
+def main():
+    """
+    Launch the server and retry if an exception is thrown
+    in app.run. Set max retries at 30, wait .5 seconds between
+    each try.
+    """
+    app.run(host='0.0.0.0', debug=True, port=8080)
+
 if __name__ == '__main__':
     # Set up logging so we keep track of all server messages
     # This obtains the log file using the LOGFILE environ variable
@@ -76,5 +87,5 @@ if __name__ == '__main__':
     logging.basicConfig(format=logging_format, handlers=[handler], level=logging.DEBUG)
 
     # Start the server
-    app.run(host='0.0.0.0', debug=True, port=8080)
+    main()
 
