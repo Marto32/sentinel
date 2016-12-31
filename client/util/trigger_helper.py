@@ -3,6 +3,8 @@ import requests
 from datetime import datetime, timedelta
 from dateutil import tz
 
+from retrying import retry
+
 from client.util.client_config import notify_tz
 
 import RPi.GPIO as gpio
@@ -198,6 +200,9 @@ class DoorMonitor(BinaryTrigger):
             # Reset start time
             self.start_time = None
 
+            # Reset the threshold interval
+            self.seconds_threshold_interval = self.seconds_threshold
+
         else:
             pass
 
@@ -209,11 +214,15 @@ class DoorMonitor(BinaryTrigger):
         # TODO - Implement scheduling logic
         return True
 
+    @retry(stop_max_attempt_number=30, wait_fixed=1000)
     def monitor(self):
         """
         This method opens an infinite loop to continuously monitor
         the trigger. It can be controlled automatically using the
         `schedule_check` method above.
+
+        By default, this method will be reran if an exception is thrown.
+        It will retry 30 times with a 1 second interval in between tries.
         """
         self.configure_gpio_input()
         while True:
