@@ -155,7 +155,7 @@ class DoorMonitor(BinaryTrigger):
             log_load = {
                 'trigger_name': self.name,
                 'event_name': payload.get('event_name'),
-                'time': self.start_time.strftime('%Y%m%d|%H:%M:%S')
+                'time': self.start_time.strftime('%Y-%m-%d|%H:%M:%S')
                 }
 
             self.log(log_load)
