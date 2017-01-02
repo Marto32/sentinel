@@ -1,8 +1,8 @@
 #! /usr/bin/env python
-from flask import Flask
+from flask import Flask, abort
 from flask_restful import Resource, Api, reqparse
 
-from api.api_config import endpoints, push_objects
+from api.api_config import endpoints, push_objects, SENTINEL_SECRET_KEY
 from api.contrib.notify_api import SentinelNotification
 from api.util.logger_utility import get_logger
 
@@ -33,9 +33,12 @@ class NotifyUser(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('event_name', type=str, required=True, location='json')
         parser.add_argument('trackers', type=dict, required=True, location='json')
+        parser.add_argument('secretkey', type=str, required=True, location='headers')
         # TODO - add more based on what we want notification endpoint to do
 
         args = parser.parse_args(strict=True)
+        if args['secretkey'] != SENTINEL_SECRET_KEY:
+            abort(403)
 
         notify_events = push_objects.get('sentinel_app').get('events')
         notifier = SentinelNotification(notify_events.get(
@@ -51,10 +54,13 @@ class LogEvent(Resource):
         parser.add_argument('trigger_name', type=str, required=True, location='json')
         parser.add_argument('event_name', type=str, required=True, location='json')
         parser.add_argument('time', type=str, required=True, location='json')
+        parser.add_argument('secretkey', type=str, required=True, location='headers')
 
         args = parser.parse_args(strict=True)
-        client_logger = get_logger('client')
+        if args['secretkey'] != SENTINEL_SECRET_KEY:
+            abort(403)
 
+        client_logger = get_logger('client')
         base_log_message = "{trigger_name}|{event_name}|{date_time}"
         client_logger.info(base_log_message.format(
             trigger_name=args['trigger_name'],
