@@ -12,6 +12,9 @@ endpoints = {
 # dictionary of Instapush objects
 push_objects = {}
 
+# Sentinel secret key
+SENTINEL_SECRET_KEY = ''
+
 # Instapush Credentials
 USER_TOKEN = ''
 APP_ID = ''
