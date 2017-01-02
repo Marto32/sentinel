@@ -5,7 +5,7 @@ from dateutil import tz
 
 from retrying import retry
 
-from client.util.client_config import notify_tz
+from client.util.client_config import notify_tz, SENTINEL_SECRET_KEY
 
 import RPi.GPIO as gpio
 
@@ -26,7 +26,8 @@ class BinaryTrigger(Trigger):
     This object is meant to be fired based on a binary trigger.
     """
 
-    def __init__(self, name, gpio_pin, notify_endpoint, log_endpoint, seconds_threshold=30):
+    def __init__(self, name, gpio_pin, notify_endpoint, log_endpoint, seconds_threshold=30,
+        sentinel_secret_key=SENTINEL_SECRET_KEY):
         """
         :param name: str, the name of the trigger (used in notifications and logging)
         :param gpio_pin: int, the gpio pin number
@@ -35,6 +36,7 @@ class BinaryTrigger(Trigger):
         :param seconds_threshold: int, the threshold used to notify the user
         :param start_time: datetime, placeholder for the time the trigger is activated
         :param state: bool, the initial state of the trigger
+        :param sentinel_secret_key: str, the app secret key set in the config file
         """
         Trigger.__init__(self)
         self.name = name
@@ -44,6 +46,7 @@ class BinaryTrigger(Trigger):
         self.seconds_threshold = float(seconds_threshold)
         self.start_time = None
         self.state = False # Initializes the state of the trigger
+        self.sentinel_secret_key = sentinel_secret_key
 
         # Set the notification timezone (to convert to
         # from UTC)
@@ -67,7 +70,8 @@ class BinaryTrigger(Trigger):
             }
         }
         """
-        return requests.post(self.notify_endpoint, json=data)
+        headers = {'secretkey': self.sentinel_secret_key}
+        return requests.post(self.notify_endpoint, json=data, headers=headers)
 
     def log(self, data):
         """
@@ -81,7 +85,8 @@ class BinaryTrigger(Trigger):
             'time': datetime
         }
         """
-        return requests.post(self.log_endpoint, json=data)
+        headers = {'secretkey': self.sentinel_secret_key}
+        return requests.post(self.log_endpoint, json=data, headers=headers)
 
     def calculate_time_on(self):
         """

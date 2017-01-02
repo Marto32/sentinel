@@ -23,3 +23,7 @@ client_identifier = ''
 
 # Set the notification timezone
 notify_tz = ''
+
+# Sentinel secret key
+SENTINEL_SECRET_KEY = ''
+
