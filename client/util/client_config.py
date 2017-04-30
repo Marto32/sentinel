@@ -13,15 +13,14 @@ endpoints = {
 
 # Define the BCM pins that are used
 # by each client
-PIN_MAP = os.environ.get('PIN_MAP').split(',')
-gpio_pin_map = {
-    k:PIN_MAP[i+1] for k,i in enumerate(PIN_MAP)
-    }
+pin_map_arg_parse = os.environ.get('PIN_MAP').split(':')
+PIN_MAP = [k.split(',') for k in pin_map_arg_parse if k]
+gpio_pin_map = {k:int(v) for k,v in dict(PIN_MAP).items()}
 
 # Identify this particular client
 # so it knows which monitor and pins to use
 # client_identifier = 'example'
-client_identifier = os.envorn.get('CLIENT_NAME')
+client_identifier = os.environ.get('CLIENT_NAME')
 
 # Set the notification timezone
 notify_tz = os.environ.get('TIMEZONE')
