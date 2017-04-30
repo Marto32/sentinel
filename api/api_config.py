@@ -2,6 +2,7 @@
 This module should house all of the configurations needed for the API.
 For example, all endpoints, credentials, etc.
 """
+import os
 
 # Set an endpoint dictionary which will be used by the API
 endpoints = {
