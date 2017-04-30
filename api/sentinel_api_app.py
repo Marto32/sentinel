@@ -2,12 +2,10 @@
 from flask import Flask, abort
 from flask_restful import Resource, Api, reqparse
 
-from api.api_config import endpoints, push_objects, SENTINEL_SECRET_KEY
-from api.contrib.notify_api import SentinelNotification
+from api.api_config import endpoints, SENTINEL_SECRET_KEY
+from api.contrib.twilio_api_helper import SendNotification
 from api.util.logger_utility import get_logger
 
-from datetime import datetime
-import simplejson
 import os
 
 from logging.handlers import RotatingFileHandler
@@ -23,16 +21,11 @@ api = Api(app)
 
 class NotifyUser(Resource):
 
-    notifications = push_objects.get('sentinel_app')
-
-    def get(self):
-        return notifications
-
     def post(self):
         # Define the requirements parser
         parser = reqparse.RequestParser()
         parser.add_argument('event_name', type=str, required=True, location='json')
-        parser.add_argument('trackers', type=dict, required=True, location='json')
+        parser.add_argument('message', type=str, required=True, location='json')
         parser.add_argument('secretkey', type=str, required=True, location='headers')
         # TODO - add more based on what we want notification endpoint to do
 
@@ -40,9 +33,7 @@ class NotifyUser(Resource):
         if args['secretkey'] != SENTINEL_SECRET_KEY:
             abort(403)
 
-        notify_events = push_objects.get('sentinel_app').get('events')
-        notifier = SentinelNotification(notify_events.get(
-            args['event_name']), args['trackers'])
+        notifier = SendNotification(args['message'])
         notifier.emit()
 
 
@@ -94,4 +85,3 @@ if __name__ == '__main__':
 
     # Start the server
     main()
-

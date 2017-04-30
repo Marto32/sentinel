@@ -65,9 +65,7 @@ class BinaryTrigger(Trigger):
         Example:
         {
             'event_name': 'name'
-            'trackers': {
-                'email': 'myemail'
-            }
+            'message': 'message text'
         }
         """
         headers = {'secretkey': self.sentinel_secret_key}
@@ -150,8 +148,9 @@ class DoorMonitor(BinaryTrigger):
             # and Log the event
             payload = {
                 'event_name': 'front_door_opened',
-                'trackers': {'time': self.convert_timezone_for_notification(self.start_time)
-                    }
+                'message': 'The front door was opened at {t}.'.format(
+                    t=self.convert_timezone_for_notification(self.start_time)
+                    )
                 }
 
             self.notify(payload)
@@ -174,8 +173,9 @@ class DoorMonitor(BinaryTrigger):
             if self.should_notify():
                 payload = {
                     'event_name': 'front_door_open_long',
-                    'trackers': {'seconds': self.calculate_time_on()
-                        }
+                    'message': 'The front door has been open for {t} seconds'.format(
+                        t=self.calculate_time_on()
+                        )
                     }
 
                 self.notify(payload)
@@ -187,8 +187,9 @@ class DoorMonitor(BinaryTrigger):
             # Prep the notificaiton payload
             payload = {
                 'event_name': 'front_door_closed',
-                'trackers': {'time': self.convert_timezone_for_notification(close_time)
-                    }
+                'message': 'The front door was closed at {t}'.format(
+                    t=self.convert_timezone_for_notification(close_time)
+                    )
                 }
 
             self.notify(payload)
@@ -233,5 +234,3 @@ class DoorMonitor(BinaryTrigger):
         while True:
             if self.schedule_check():
                 self.route_action()
-
-

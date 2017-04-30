@@ -9,13 +9,12 @@ endpoints = {
         'log'   : '/sentinel/v1/log'
         }
 
-# dictionary of Instapush objects
-push_objects = {}
-
 # Sentinel secret key
-SENTINEL_SECRET_KEY = ''
+SENTINEL_SECRET_KEY = os.environ.get('SENTINEL_SECRET_KEY')
 
-# Instapush Credentials
-USER_TOKEN = ''
-APP_ID = ''
-APP_SECRET = ''
+# Twilio Credentials
+TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID')
+TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')
+# Phone numbers must be in the format +1xxxxxxxxxx
+TWILIO_SOURCE_PHONE = os.environ.get('TWILIO_SOURCE_PHONE')
+TWILIO_DESTINATION_PHONE =os.environ.get('TWILIO_DESTINATION_PHONE')
