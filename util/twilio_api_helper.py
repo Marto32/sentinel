@@ -1,6 +1,10 @@
 from twilio.rest import Client
-from api.api_config import (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN,
-    TWILIO_SOURCE_PHONE, TWILIO_DESTINATION_PHONE)
+from settings import (
+    TWILIO_ACCOUNT_SID,
+    TWILIO_AUTH_TOKEN,
+    TWILIO_SOURCE_PHONE,
+    TWILIO_DESTINATION_PHONE
+)
 
 
 class SendNotification(object):
@@ -9,7 +13,7 @@ class SendNotification(object):
     NOTE: This should always be sent using this classes `emit` method.
     """
 
-    def __init__(self, message):
+    def __init__(self, message: str) -> None:
         # TODO(Doc): Update Docstring
         """
         :param event: string, event name
@@ -31,7 +35,7 @@ class SendNotification(object):
         )
 
     @property
-    def payload(self):
+    def payload(self) -> dict:
         params = {
             'body': self.message_body,
             'to': TWILIO_DESTINATION_PHONE,
@@ -39,10 +43,11 @@ class SendNotification(object):
         }
         return params
 
-    def emit(self):
+    def emit(self) -> Client:
         """
         Calls twilio with the specified payload
         """
         return self.client.messages.create(
             **self.payload
         )
+
