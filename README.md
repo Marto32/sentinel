@@ -12,3 +12,19 @@ The system consists of physical sensors connected to a network of Raspberry Pi's
  * Script tracks time and calls API
  * API notifies user and logs info provided
 
+## Setup
+Sentinel uses [Twilio](https://www.twilio.com/sms) to send notifications via SMS. You can sign up for a free account on their site. In addition, the following environment variables need to be defined so Sentinel can access your Twilio account:
+
+```
+TWILIO_ACCOUNT_SID          The account service ID provided by Twilio
+TWILIO_AUTH_TOKEN           Authorization token provided by Twilio
+TWILIO_SOURCE_PHONE         Must be in the format +1xxxxxxxxxx
+TWILIO_DESTINATION_PHONE    Same format as above
+```
+
+In addition to your twilio credentials, Sentinel also needs some information regarding your Raspberry Pi:
+```
+PIN                         Defines the BCM pin on the RPi that is used (more info below)
+TIMEZONE                    Used to convert notification times to your time zone
+```
+
