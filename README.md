@@ -9,7 +9,7 @@ The system consists of physical sensors connected to a network of Raspberry Pi's
 
  * Sensor is activated
  * RPi initiates an onboard script
- * Script tracks time and calls API
+ * Script tracks time and calls the Twilio API
  * API notifies user and logs info provided
 
 ## Setup
@@ -26,5 +26,17 @@ In addition to your twilio credentials, Sentinel also needs some information reg
 ```
 PIN                         Defines the BCM pin on the RPi that is used (more info below)
 TIMEZONE                    Used to convert notification times to your time zone
+```
+
+With these updates, your launch command may look something like this:
+
+```
+export TWILIO_ACCOUNT_SID=xxxxxxxxxxxxxxxxxxx
+export TWILIO_AUTH_TOKEN=xxxxxxxxxxxxxx
+export TWILIO_SOURCE_PHONE='+1xxxxxxxxxx'
+export TWILIO_DESTINATION_PHONE='+1xxxxxxxxxx'
+export TIMEZONE='America/New_York'
+export PIN=12
+python run.py
 ```
 
