@@ -12,7 +12,7 @@ TWILIO_SOURCE_PHONE = os.environ.get('TWILIO_SOURCE_PHONE')
 TWILIO_DESTINATION_PHONE =os.environ.get('TWILIO_DESTINATION_PHONE')
 
 # Define the BCM pin that should be used
-PIN = os.environ.get('PIN')
+PIN = int(os.environ.get('PIN'))
 
 # Set the notification timezone
 notify_tz = os.environ.get('TIMEZONE')

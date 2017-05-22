@@ -43,7 +43,7 @@ class SendNotification(object):
         }
         return params
 
-    def emit(self) -> Client.messages.create:
+    def emit(self) -> Client:
         """
         Calls twilio with the specified payload
         """

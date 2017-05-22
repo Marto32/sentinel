@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from dateutil import tz
 
 from settings import notify_tz
-from contrib.twilio_api_helper import SendNotification
+from util.twilio_api_helper import SendNotification
 from typing import Optional
 
 
@@ -17,9 +17,9 @@ class StatefulSwitch(object):
     name: str = attr.ib()
     gpio_pin: int = attr.ib()
     gpio_configured: bool = attr.ib(default=False)
+    start_time: Optional[datetime] = attr.ib(default=None)
     seconds_threshold: int = attr.ib(default=30)
     seconds_threshold_interval: Optional[int] = attr.ib(default=None)
-    start_time: Optional[datetime] = attr.ib()
     wakeful_state: bool = attr.ib(default=False)
     notification_tz: tz.tzlocal = attr.ib(default=tz.gettz(notify_tz))
 
