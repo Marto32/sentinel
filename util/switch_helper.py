@@ -116,7 +116,8 @@ class StatefulSwitch(object):
         # switch activated and opened for the first time
         if switch_active and not self.wakeful_state:
             self.start_time = datetime.utcnow()
-            self.notify(self.switch_opened_message(self.start_time.strftime('%H:%M:%S')))
+            notify_time = convert_timezone_for_notification(self.start_time)
+            self.notify(self.switch_opened_message(notify_time))
             self.wakeful_state = True
 
         # switch remains active and open
@@ -128,9 +129,10 @@ class StatefulSwitch(object):
 
         # switch closed
         elif not switch_active and self.wakeful_state:
-            close_time: datetime = datetime.utcnow()
-            self.notify(self.switch_closed_message(
-                close_time.strftime('%H:%M:%S')))
+            close_time: datetime = convert_timezone_for_notification(
+                datetime.utcnow()
+            )
+            self.notify(self.switch_closed_message(close_time))
             self.wakeful_state = False
             self.start_time = None
             self.seconds_threshold_interval = self.seconds_threshold
@@ -146,4 +148,3 @@ class DoorMonitor(StatefulSwitch):
 
     def switch_closed_message(self, time: str) -> str:
         return f'The door was closed at {time}.'
-
