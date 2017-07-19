@@ -116,7 +116,7 @@ class StatefulSwitch(object):
         # switch activated and opened for the first time
         if switch_active and not self.wakeful_state:
             self.start_time = datetime.utcnow()
-            notify_time = convert_timezone_for_notification(self.start_time)
+            notify_time = self.convert_timezone_for_notification(self.start_time)
             self.notify(self.switch_opened_message(notify_time))
             self.wakeful_state = True
 
@@ -129,7 +129,7 @@ class StatefulSwitch(object):
 
         # switch closed
         elif not switch_active and self.wakeful_state:
-            close_time: datetime = convert_timezone_for_notification(
+            close_time: datetime = self.convert_timezone_for_notification(
                 datetime.utcnow()
             )
             self.notify(self.switch_closed_message(close_time))
