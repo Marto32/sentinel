@@ -88,3 +88,6 @@ sentinel36/
 
 # Rope project settings
 .ropeproject
+
+# Pycharm stuff
+.idea/
